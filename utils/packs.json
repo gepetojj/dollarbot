@@ -1,0 +1,19 @@
+{
+    "standardEmbedColor": "#5d5ced",
+    "standardErrorTitle": "Erro",
+    "standardErrorDesc": "Ocorreu um erro.",
+    "standardErrorField": "Descrição:",
+    "pingCommand": {
+        "embedTitle": "Teste de latência",
+        "embedDesc": "Demora para o servidor responder em milisegundos.",
+        "embedField": "Latência",
+        "embedFooter": "Pedido por:",
+        "embedExtra": "A latência está sendo calculada..."
+    },
+    "dollarCommand": {
+        "embedTitle": "Dólar comercial",
+        "embedDesc": "O valor atualizado do dólar comercial.",
+        "embedField": "Valor:",
+        "embedExtra": "Histórico do dólar"
+    }
+}
