@@ -1,7 +1,7 @@
 require("dotenv").config();
 const axios = require("axios");
 const Discord = require("discord.js");
-const moment = require("moment");
+const moment = require("moment-timezone");
 const fs = require("fs");
 const Heroku = require("heroku-client");
 const {
@@ -15,7 +15,7 @@ const client = new Discord.Client();
 const heroku = new Heroku({ token: process.env.HEROKU_API_TOKEN });
 
 client.commands = new Discord.Collection();
-moment.locale("pt-BR");
+moment.tz("America/Maceio");
 
 let prefixCache = {};
 
@@ -382,7 +382,7 @@ try {
     }, 3000);
 } catch (err) {
     console.error(err);
-    if (process.env.NODE_ENV !== "development") {
+    if (process.env.NODE_ENV === "production") {
         heroku.get("/apps").then((apps) => {
             apps.forEach((app) => {
                 if (app.name === "dollarbot-ds") {

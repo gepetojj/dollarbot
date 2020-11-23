@@ -27,6 +27,11 @@
         "embedDesc": "O prefix deste servidor agora é:",
         "embedFooter": "Alterado por:"
     },
+    "myDollarsCommand": {
+        "embedTitle": "Seus dólares",
+        "embedDesc": "Você tem uma quantidade de dólares em cada servidor que participa com o dollarbot.",
+        "embedField": "Sua conta tem:"
+    },
     "newGuild": {
         "embedTitle": "Olá! Obrigado por me adicionar no seu servidor!",
         "embedDesc": "Segue abaixo instruções que acho importante saber.",
