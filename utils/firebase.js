@@ -5,7 +5,7 @@ const config = {
     type: "service_account",
     project_id: "dollarbot-ds",
     private_key_id: process.env.PKID,
-    private_key: process.env.PK,
+    private_key: process.env.PK.replace(/\\n/g, '\n'),
     client_email: process.env.CEMAIL,
     client_id: process.env.CID,
     auth_uri: "https://accounts.google.com/o/oauth2/auth",

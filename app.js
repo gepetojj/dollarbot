@@ -382,7 +382,7 @@ try {
     }, 3000);
 } catch (err) {
     console.error(err);
-    if (process.env.NODE_ENVIRONMENT !== "development") {
+    if (process.env.NODE_ENV !== "development") {
         heroku.get("/apps").then((apps) => {
             apps.forEach((app) => {
                 if (app.name === "dollarbot-ds") {
