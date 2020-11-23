@@ -40,5 +40,9 @@
                 "Usuários do seu servidor ganham esta moeda fictícia e podem gastar na loja do dollarbot, aumentando a interação no seu servidor."
             ]
         }
+    },
+    "logs": {
+        "embedTitle": "Registros de alteração",
+        "embedFooter": "Alterado por:"
     }
 }

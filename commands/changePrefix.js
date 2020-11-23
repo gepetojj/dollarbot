@@ -51,8 +51,23 @@ module.exports = {
                                         `${packs.changePrefixCommand.embedFooter} ${message.author.username}`,
                                         message.author.avatarURL()
                                     );
+                                message.channel.send(embed);
+
+                                const logChannel = message.client.channels.cache.get(
+                                    doc.data().dbChannel
+                                );
+                                const logEmbed = new Discord.MessageEmbed()
+                                    .setColor(packs.standardEmbedColor)
+                                    .setTitle(packs.logs.embedTitle)
+                                    .setDescription(
+                                        `${message.author} alterou o prefix deste servidor para: ${args[0]}`
+                                    )
+                                    .setFooter(
+                                        `${packs.logs.embedFooter} ${message.author.username}`,
+                                        message.author.avatarURL()
+                                    );
                                 message.channel.stopTyping();
-                                return message.channel.send(embed);
+                                return logChannel.send(logEmbed);
                             })
                             .catch((err) => {
                                 console.error(err);

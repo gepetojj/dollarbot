@@ -3,6 +3,7 @@ const axios = require("axios");
 const Discord = require("discord.js");
 const moment = require("moment");
 const fs = require("fs");
+const Heroku = require("heroku-client");
 const {
     globalPrefix,
     richPresence,
@@ -11,6 +12,7 @@ const {
 const firebase = require("./utils/firebase");
 const packs = require("./utils/packs.json");
 const client = new Discord.Client();
+const heroku = new Heroku({ token: process.env.HEROKU_API_TOKEN });
 
 client.commands = new Discord.Collection();
 moment.locale("pt-BR");
@@ -71,7 +73,26 @@ for (const command of commandsList) {
 
 // Executa os comandos
 
-client.on("message", (message) => {
+client.on("message", async (message) => {
+    const channels = await getAllDbChannels();
+    channels.forEach((channel) => {
+        if (
+            message.channel.id === channel.dbChannel &&
+            message.author.id !== client.user.id
+        ) {
+            message.delete().then(async () => {
+                const embed = new Discord.MessageEmbed()
+                    .setColor(packs.standardEmbedErrorColor)
+                    .setTitle(packs.standardErrorTitle)
+                    .setDescription(packs.standardErrorDesc)
+                    .addField(
+                        packs.standardErrorField,
+                        `Você não pode conversar aqui, ${message.author}.`
+                    );
+            });
+        }
+    });
+
     if (
         !message.content.startsWith(prefixCache[message.guild.id]) ||
         message.author.bot
@@ -277,22 +298,29 @@ async function sendDollarStatus() {
                 .setDescription(packs.dollarCommand.embedDesc)
                 .addField(packs.dollarCommand.embedField, `R$ ${value}`)
                 .setFooter(`${moment().format("LTS")} ${moment().format("L")}`);
-            channel.send(embed).then((message) => {
-                setInterval(async () => {
-                    value = await getDollarValue();
-                    let embed = new Discord.MessageEmbed()
-                        .setColor(packs.standardEmbedColor)
-                        .setTitle(packs.dollarCommand.embedTitle)
-                        .setDescription(packs.dollarCommand.embedDesc)
-                        .addField(packs.dollarCommand.embedField, `R$ ${value}`)
-                        .setFooter(
-                            `${moment().format("LTS")} ${moment().format("L")}`
-                        );
-                    message.edit(embed).catch((err) => {
-                        console.error(err);
-                    });
-                }, 5000);
-            });
+            setTimeout(() => {
+                channel.send(embed).then((message) => {
+                    setInterval(async () => {
+                        value = await getDollarValue();
+                        let embed = new Discord.MessageEmbed()
+                            .setColor(packs.standardEmbedColor)
+                            .setTitle(packs.dollarCommand.embedTitle)
+                            .setDescription(packs.dollarCommand.embedDesc)
+                            .addField(
+                                packs.dollarCommand.embedField,
+                                `R$ ${value}`
+                            )
+                            .setFooter(
+                                `${moment().format("LTS")} ${moment().format(
+                                    "L"
+                                )}`
+                            );
+                        message.edit(embed).catch((err) => {
+                            console.error(err);
+                        });
+                    }, 5000);
+                });
+            }, 2000);
         } catch (err) {
             console.error(err);
         }
@@ -354,4 +382,17 @@ try {
     }, 3000);
 } catch (err) {
     console.error(err);
+    if (process.env.NODE_ENVIRONMENT !== "development") {
+        heroku.get("/apps").then((apps) => {
+            apps.forEach((app) => {
+                if (app.name === "dollarbot-ds") {
+                    heroku.get(`/apps/${app.name}/dynos`).then((dynos) => {
+                        dynos.forEach((dyno) => {
+                            heroku.delete(`/apps/${app.name}/dynos/${dyno.id}`);
+                        });
+                    });
+                }
+            });
+        });
+    }
 }
