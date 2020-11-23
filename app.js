@@ -15,7 +15,8 @@ const client = new Discord.Client();
 const heroku = new Heroku({ token: process.env.HEROKU_API_TOKEN });
 
 client.commands = new Discord.Collection();
-moment.tz("America/Maceio");
+moment.locale("pt-BR");
+moment.tz.setDefault("America/Maceio");
 
 let prefixCache = {};
 
