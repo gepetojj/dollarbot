@@ -40,24 +40,83 @@ for (const command of commandsList) {
 // Executa os comandos
 
 client.on("message", (message) => {
-    if (
-        !message.content.startsWith(globalPrefix) ||
-        message.author.bot ||
-        message.channel.type !== "text"
-    )
-        return;
+    if (!message.content.startsWith(globalPrefix) || message.author.bot) return;
 
     const args = message.content.slice(globalPrefix.length).split(" ");
-    const command = client.commands.get(args.shift().toLowerCase());
+    const commandName = args.shift().toLowerCase();
 
-    if (command) {
-        command.execute(message, args, client);
+    const command =
+        client.commands.get(commandName) ||
+        client.commands.find(
+            (cmd) => cmd.aliases && cmd.aliases.includes(commandName)
+        );
+
+    if (!command) return;
+
+    if (command.guildOnly === true && message.channel.type !== "text") {
+        const embed = new Discord.MessageEmbed()
+            .setColor(packs.standardEmbedErrorColor)
+            .setTitle(packs.standardErrorTitle)
+            .setDescription(packs.standardErrorDesc)
+            .addField(
+                packs.standardErrorField,
+                "Este comando só pode ser executado em servidores."
+            );
+        return message.reply(embed);
+    }
+
+    if (command.args && !args.length) {
+        let description = "Este comando precisa de argumentos.";
+
+        if (command.usage) {
+            description += `\nO modo de usar este comando é: **${globalPrefix}${command.name} ${command.usage}**`;
+        }
+
+        const embed = new Discord.MessageEmbed()
+            .setColor(packs.standardEmbedErrorColor)
+            .setTitle(packs.standardErrorTitle)
+            .setDescription(packs.standardErrorDesc)
+            .addField(packs.standardErrorField, description);
+
+        return message.channel.send(embed);
+    }
+
+    try {
+        command.execute(message, args);
+    } catch (error) {
+        console.error(error);
+        const embed = new Discord.MessageEmbed()
+            .setColor(packs.standardEmbedErrorColor)
+            .setTitle(packs.standardErrorTitle)
+            .setDescription(packs.standardErrorDesc)
+            .addField(
+                packs.standardErrorField,
+                "Houve um erro ao tentar executar esse comando."
+            );
+        message.reply(embed);
     }
 });
 
 // Escuta entradas e saidas em servidores
 
 client.on("guildCreate", (guild) => {
+    let embed = new Discord.MessageEmbed()
+        .setColor(packs.standardEmbedColor)
+        .setTitle(packs.newGuild.embedTitle)
+        .setDescription(packs.newGuild.embedDesc)
+        .addField(
+            packs.newGuild.embedField.first[0],
+            packs.newGuild.embedField.first[1]
+        )
+        .addField(
+            packs.newGuild.embedField.second[0],
+            packs.newGuild.embedField.second[1]
+        )
+        .setFooter(
+            `Obrigado ${guild.owner.user.username}.`,
+            guild.owner.user.avatarURL()
+        );
+    guild.owner.send(embed);
     guild.channels
         .create("dollar-status", {
             type: "text",

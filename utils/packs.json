@@ -1,5 +1,6 @@
 {
     "standardEmbedColor": "#5d5ced",
+    "standardEmbedErrorColor": "ff6961",
     "standardErrorTitle": "Erro",
     "standardErrorDesc": "Ocorreu um erro.",
     "standardErrorField": "Descrição:",
@@ -15,5 +16,24 @@
         "embedDesc": "O valor atualizado do dólar comercial.",
         "embedField": "Valor:",
         "embedExtra": "Histórico do dólar"
+    },
+    "convertCommand": {
+        "embedTitle": "Conversão de moedas",
+        "embedField": "dólares em reais:",
+        "embedFooter": "Pedido por:"
+    },
+    "newGuild": {
+        "embedTitle": "Olá! Obrigado por me adicionar no seu servidor!",
+        "embedDesc": "Segue abaixo instruções que acho importante saber.",
+        "embedField": {
+            "first": [
+                "Meu canal automático",
+                "Ele não pode ser excluido. Você pode personaliza-lo, mudando o nome, descrição ou categoria."
+            ],
+            "second": [
+                "Dólares do dollarbot",
+                "Usuários do seu servidor ganham esta moeda fictícia e podem gastar na loja do dollarbot, aumentando a interação no seu servidor."
+            ]
+        }
     }
 }

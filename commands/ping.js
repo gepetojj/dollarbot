@@ -3,6 +3,8 @@ const packs = require("../utils/packs.json");
 
 module.exports = {
     name: "ping",
+    args: false,
+    guildOnly: false,
     description: "Testa a latência entre o bot e o servidor.",
     execute(message) {
         let calcEmbed = new Discord.MessageEmbed()
