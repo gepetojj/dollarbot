@@ -3,13 +3,19 @@ const axios = require("axios");
 const Discord = require("discord.js");
 const moment = require("moment");
 const fs = require("fs");
-const { globalPrefix, richPresence } = require("./utils/settings.json");
+const {
+    globalPrefix,
+    richPresence,
+    dollarApi,
+} = require("./utils/settings.json");
 const firebase = require("./utils/firebase");
 const packs = require("./utils/packs.json");
 const client = new Discord.Client();
 
 client.commands = new Discord.Collection();
 moment.locale("pt-BR");
+
+let prefixCache = {};
 
 // Configurações do banco de dados
 
@@ -24,6 +30,32 @@ client.on("ready", () => {
         let choice = Math.floor(Math.random() * richPresence.length);
         client.user.setActivity(richPresence[choice], { type: "PLAYING" });
     }, 7000);
+
+    client.guilds.cache.forEach((server) => {
+        const serverId = server.id;
+        if (!prefixCache[serverId]) {
+            serversList
+                .doc(serverId)
+                .get()
+                .then((doc) => {
+                    if (doc.exists) {
+                        prefixCache[serverId] = doc.data().prefix;
+                    } else {
+                        prefixCache[serverId] = globalPrefix;
+                    }
+                })
+                .catch((err) => {
+                    console.error(err);
+                    prefixCache[serverId] = globalPrefix;
+                });
+        }
+
+        serversList.doc(serverId).onSnapshot((doc) => {
+            if (doc.exists) {
+                prefixCache[serverId] = doc.data().prefix;
+            }
+        });
+    });
 });
 
 // Importa os comandos da pasta 'commands'
@@ -40,9 +72,15 @@ for (const command of commandsList) {
 // Executa os comandos
 
 client.on("message", (message) => {
-    if (!message.content.startsWith(globalPrefix) || message.author.bot) return;
+    if (
+        !message.content.startsWith(prefixCache[message.guild.id]) ||
+        message.author.bot
+    )
+        return;
 
-    const args = message.content.slice(globalPrefix.length).split(" ");
+    const args = message.content
+        .slice(prefixCache[message.guild.id].length)
+        .split(" ");
     const commandName = args.shift().toLowerCase();
 
     const command =
@@ -144,6 +182,7 @@ client.on("guildCreate", (guild) => {
                         .set({
                             serverId: guild.id,
                             dbChannel: channel.id,
+                            prefix: ">",
                             usersList: finalUsersList,
                         })
                         .catch((err) => {
@@ -211,10 +250,9 @@ client.on("channelDelete", (channel) => {
 
 async function getDollarValue() {
     try {
-        const response = await axios.get(
-            "https://economia.awesomeapi.com.br/json/all/USD-BRL"
-        );
-        return response.data.USD.high;
+        const response = await axios.get(dollarApi);
+        const dollarValue = response.data.USD.high * 1;
+        return dollarValue.toFixed(2);
     } catch (err) {
         console.error(err);
         return "Houve um erro";
@@ -309,7 +347,11 @@ client.login(process.env.TOKEN);
 
 // Executa os loops
 
-setTimeout(() => {
-    sendDollarPlot();
-    sendDollarStatus();
-}, 3000);
+try {
+    setTimeout(() => {
+        sendDollarPlot();
+        sendDollarStatus();
+    }, 3000);
+} catch (err) {
+    console.error(err);
+}

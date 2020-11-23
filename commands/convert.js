@@ -1,6 +1,7 @@
 const Discord = require("discord.js");
 const axios = require("axios");
 const packs = require("../utils/packs.json");
+const { dollarApi } = require("../utils/settings.json");
 
 module.exports = {
     name: "convert",
@@ -13,15 +14,15 @@ module.exports = {
         message.channel.startTyping();
         try {
             axios
-                .get("https://economia.awesomeapi.com.br/json/all/USD-BRL")
+                .get(dollarApi)
                 .then((response) => {
                     const convertedValue = response.data.USD.high * args[0];
                     let embed = new Discord.MessageEmbed()
                         .setColor(packs.standardEmbedColor)
                         .setTitle(packs.convertCommand.embedTitle)
                         .addField(
-                            `${args[0]} ${packs.convertCommand.embedField}`,
-                            `R$ ${convertedValue}`
+                            `$${args[0]} ${packs.convertCommand.embedField}`,
+                            `R$ ${convertedValue.toFixed(2)}`
                         )
                         .setFooter(
                             `${packs.convertCommand.embedFooter} ${message.author.username}`,

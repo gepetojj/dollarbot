@@ -19,8 +19,13 @@
     },
     "convertCommand": {
         "embedTitle": "Conversão de moedas",
-        "embedField": "dólares em reais:",
+        "embedField": "em reais:",
         "embedFooter": "Pedido por:"
+    },
+    "changePrefixCommand": {
+        "embedTitle": "Operação concluída",
+        "embedDesc": "O prefix deste servidor agora é:",
+        "embedFooter": "Alterado por:"
     },
     "newGuild": {
         "embedTitle": "Olá! Obrigado por me adicionar no seu servidor!",

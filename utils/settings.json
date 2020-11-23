@@ -6,5 +6,6 @@
         "monopoly.",
         "https://lastpassword.netlify.app/",
         "https://pedrapapeletesoura-online.web.app/"
-    ]
+    ],
+    "dollarApi": "https://economia.awesomeapi.com.br/json/all/USD-BRL"
 }

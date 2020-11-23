@@ -7,6 +7,7 @@ module.exports = {
     guildOnly: false,
     description: "Testa a latência entre o bot e o servidor.",
     execute(message) {
+        message.channel.startTyping();
         let calcEmbed = new Discord.MessageEmbed()
             .setColor(packs.standardEmbedColor)
             .setTitle(packs.pingCommand.embedTitle)
@@ -34,5 +35,6 @@ module.exports = {
                 );
             sendedMessage.edit(pingEmbed);
         });
+        message.channel.stopTyping();
     },
 };
