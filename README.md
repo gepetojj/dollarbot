@@ -14,4 +14,5 @@ O dollarbot tem o objetivo de passar o valor do dólar mais facilmente para os u
 **Discord.js** - Facilitando a conexão com a API do Discord<br> 
 **Moment-timezone** - Retornando data e hora<br>
 **Fs** - Lendo arquivos<br>
-**Firebase** - Usando a API do Firebase 
+**Firebase** - Usando a API do Firebase<br>
+**Heroku** - Usando a API da Heroku
