@@ -15,6 +15,7 @@ const client = new Discord.Client();
 const heroku = new Heroku({ token: process.env.HEROKU_API_TOKEN });
 
 client.commands = new Discord.Collection();
+const cooldowns = new Discord.Collection();
 moment.locale("pt-BR");
 moment.tz.setDefault("America/Maceio");
 
@@ -81,15 +82,19 @@ client.on("message", async (message) => {
             message.channel.id === channel.dbChannel &&
             message.author.id !== client.user.id
         ) {
-            message.delete().then(async () => {
-                const embed = new Discord.MessageEmbed()
-                    .setColor(packs.standardEmbedErrorColor)
-                    .setTitle(packs.standardErrorTitle)
-                    .setDescription(packs.standardErrorDesc)
-                    .addField(
-                        packs.standardErrorField,
-                        `Você não pode conversar aqui, ${message.author}.`
-                    );
+            const embed = new Discord.MessageEmbed()
+                .setColor(packs.standardEmbedErrorColor)
+                .setTitle(packs.standardErrorTitle)
+                .setDescription(packs.standardErrorDesc)
+                .addField(
+                    packs.standardErrorField,
+                    `Você não pode conversar aqui, ${message.author}.`
+                );
+            message.reply(embed).then((sendedMessage) => {
+                message.delete();
+                setTimeout(() => {
+                    sendedMessage.delete();
+                }, 5000);
             });
         }
     });
@@ -141,7 +146,57 @@ client.on("message", async (message) => {
         return message.channel.send(embed);
     }
 
+    if (!cooldowns.has(command.name)) {
+        cooldowns.set(command.name, new Discord.Collection());
+    }
+
+    const now = Date.now();
+    const timestamps = cooldowns.get(command.name);
+    const cooldownAmount = (5 || 3) * 1000;
+
+    if (timestamps.has(message.author.id)) {
+        const expirationTime =
+            timestamps.get(message.author.id) + cooldownAmount;
+
+        if (now < expirationTime) {
+            const timeLeft = (expirationTime - now) / 1000;
+            const embed = new Discord.MessageEmbed()
+                .setColor(packs.standardEmbedErrorColor)
+                .setTitle(packs.standardErrorTitle)
+                .setDescription(packs.standardErrorDesc)
+                .addField(
+                    packs.standardErrorField,
+                    `Você ainda precisa esperar ${timeLeft.toFixed(
+                        1
+                    )} segundos para usar esse comando.`
+                );
+            return message.reply(embed).then((sendedMessage) => {
+                setTimeout(() => {
+                    sendedMessage.delete();
+                }, 3000);
+            });
+        }
+    }
+
+    timestamps.set(message.author.id, now);
+    setTimeout(() => timestamps.delete(message.author.id), cooldownAmount);
+
     try {
+        const dollarsToReceive = Math.floor(Math.random() * 7 + 1);
+        serversList
+            .doc(message.guild.id)
+            .get()
+            .then((doc) => {
+                if (doc.exists) {
+                    const data = doc.data();
+                    const userDollars =
+                        data.usersList[message.author.id].dollars;
+                    userDollars = userDollars + dollarsToReceive;
+                    serversList.doc(message.guild.id).update({
+                        usersList: data.usersList,
+                    });
+                }
+            });
         command.execute(message, args);
     } catch (error) {
         console.error(error);
