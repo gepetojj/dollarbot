@@ -152,7 +152,7 @@ client.on("message", async (message) => {
 
     const now = Date.now();
     const timestamps = cooldowns.get(command.name);
-    const cooldownAmount = (5 || 3) * 1000;
+    const cooldownAmount = 5 * 1000;
 
     if (timestamps.has(message.author.id)) {
         const expirationTime =
@@ -189,13 +189,21 @@ client.on("message", async (message) => {
             .then((doc) => {
                 if (doc.exists) {
                     const data = doc.data();
-                    const userDollars =
-                        data.usersList[message.author.id].dollars;
-                    userDollars = userDollars + dollarsToReceive;
-                    serversList.doc(message.guild.id).update({
-                        usersList: data.usersList,
-                    });
+                    data.usersList[message.author.id].dollars =
+                        data.usersList[message.author.id].dollars +
+                        dollarsToReceive;
+                    serversList
+                        .doc(message.guild.id)
+                        .update({
+                            usersList: data.usersList,
+                        })
+                        .catch((err) => {
+                            console.error(err);
+                        });
                 }
+            })
+            .catch((err) => {
+                console.error(err);
             });
         command.execute(message, args);
     } catch (error) {
@@ -431,14 +439,14 @@ client.login(process.env.TOKEN);
 
 // Executa os loops
 
-try {
-    setTimeout(() => {
-        sendDollarPlot();
-        sendDollarStatus();
-    }, 3000);
-} catch (err) {
-    console.error(err);
-    if (process.env.NODE_ENV === "production") {
+if (process.env.NODE_ENV === "production") {
+    try {
+        setTimeout(() => {
+            sendDollarPlot();
+            sendDollarStatus();
+        }, 3000);
+    } catch (err) {
+        console.error(err);
         heroku.get("/apps").then((apps) => {
             apps.forEach((app) => {
                 if (app.name === "dollarbot-ds") {
